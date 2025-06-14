@@ -16,7 +16,7 @@ Bot para Discord que envia automaticamente as notícias da newsletter do Filipe 
 
 ## Sobre o Projeto
 
-O Newsletter Bot é uma solução para manter sua comunidade informada sobre tecnologia e programação através do Discord. O bot captura e encaminha automaticamente as edições da newsletter do [Filipe Deschamps](https://filipedeschamps.com.br/newsletter), uma das newsletters de tecnologia mais populares do Brasil, diretamente para o canal configurado no seu servidor Discord.
+O Newsletter Bot é uma solução para manter sua comunidade informada sobre tecnologia e programação através do Discord. O bot captura e encaminha automaticamente as edições da [newsletter do Filipe Deschamps](https://filipedeschamps.com.br/newsletter), uma das newsletters de tecnologia mais populares do Brasil, diretamente para o canal configurado no seu servidor Discord.
 
 ## Começando
 
