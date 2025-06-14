@@ -6,7 +6,7 @@
     <img src="https://img.shields.io/github/stars/matheusaudibert/newsletter-bot?color=5765F2&logo=github&style=flat-square" alt="GitHub Stars" width="108px">
   </a>
   <a href="https://newsletterbot.audibert.dev" target="_blank">
-    <img src="https://img.shields.io/badge/adicionar%20bot-ecd767?style=flat-square&logo=discord&logoColor=white&color=5765F2" alt="Assinar a Newsletter" width="151px">
+    <img src="https://img.shields.io/badge/adicionar%20o%20bot-ecd767?style=flat-square&logo=discord&logoColor=white&color=5765F2" alt="Adicionar o Bot" width="151px">
   </a>
 </p>
 
