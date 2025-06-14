@@ -11,7 +11,6 @@ export async function getLatestNews() {
     }
 
     const data = await response.json();
-    console.log("Notícia obtidas com sucesso");
     return data;
   } catch (error) {
     console.error("Erro ao buscar notícia:", error);
