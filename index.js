@@ -122,15 +122,8 @@ client.on("interactionCreate", async (interaction) => {
         });
       }
     } else if (interaction.isButton()) {
-      if (interaction.customId === "sourceButton") {
-        await interaction
-          .reply({
-            content: "Redirecionando para a fonte...",
-            ephemeral: true,
-          })
-          .catch(console.error);
-      } else if (interaction.customId === "inviteButton") {
-        const inviteLink = `https://newsletter.audibert.dev`;
+      if (interaction.customId === "inviteButton") {
+        const inviteLink = `https://newsletterbot.audibert.dev`;
         await interaction
           .reply({
             content: `Adicione o bot ao seu servidor: ${inviteLink}`,
