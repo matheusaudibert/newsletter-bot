@@ -126,7 +126,7 @@ client.on("interactionCreate", async (interaction) => {
         const inviteLink = `https://newsletterbot.audibert.dev`;
         await interaction
           .reply({
-            content: `Adicione o bot ao seu servidor: ${inviteLink}`,
+            content: `Adicione o bot ao seu servidor através do website oficial: ${inviteLink}`,
             ephemeral: true,
           })
           .catch(console.error);
@@ -171,18 +171,37 @@ async function startNewsCheck() {
               const channel = await client.channels
                 .fetch(channelId)
                 .catch((err) => null);
+
               if (channel && channel.type === ChannelType.GuildText) {
-                const embed = createNewsEmbed(news);
-                const roleId = config.value.newsRole;
-                const mentionText = roleId ? `<@&${roleId}>` : "";
-                await channel
-                  .send({ content: mentionText, ...embed })
-                  .catch((err) => {
-                    console.error(
-                      `Erro ao enviar para o canal ${channelId} no servidor ${config.id}:`,
-                      err
-                    );
-                  });
+                // Verificar a última mensagem do canal
+                const messages = await channel.messages.fetch({ limit: 1 });
+                const lastMessage = messages.first();
+
+                // Verificar se a última mensagem é do bot e contém a mesma notícia
+                const isAlreadySent =
+                  lastMessage &&
+                  lastMessage.author.id === client.user.id &&
+                  lastMessage.embeds.length > 0 &&
+                  lastMessage.embeds[0].footer &&
+                  lastMessage.embeds[0].footer.text.includes(news.id);
+
+                if (!isAlreadySent) {
+                  const embed = createNewsEmbed(news);
+                  const roleId = config.value.newsRole;
+                  const mentionText = roleId ? `<@&${roleId}>` : "";
+                  await channel
+                    .send({ content: mentionText, ...embed })
+                    .catch((err) => {
+                      console.error(
+                        `Erro ao enviar para o canal ${channelId} no servidor ${config.id}:`,
+                        err
+                      );
+                    });
+                } else {
+                  console.log(
+                    `Notícia já enviada no canal ${channelId}, pulando.`
+                  );
+                }
               }
             } catch (err) {
               console.error(

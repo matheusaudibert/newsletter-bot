@@ -13,7 +13,10 @@ export function createNewsEmbed(news) {
     .setDescription(news.body)
     .setURL(news.url)
     .setTimestamp(new Date(news.published_at))
-    .setFooter({ text: `Newsletter` });
+    .setFooter({
+      text: "Newsletter",
+      iconURL: "https://filipedeschamps.com.br/avatar-big.png",
+    });
 
   // Adicionar botões
   const row = new ActionRowBuilder().addComponents(
