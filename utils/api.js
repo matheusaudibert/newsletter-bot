@@ -7,14 +7,14 @@ export async function getLatestNews() {
     const response = await fetch(API_URL);
 
     if (!response.ok) {
-      throw new Error(`Falha ao obter notícias: ${response.status}`);
+      throw new Error(`Falha ao obter notícia: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Notícias obtidas com sucesso:", data);
+    console.log("Notícia obtidas com sucesso");
     return data;
   } catch (error) {
-    console.error("Erro ao buscar notícias:", error);
+    console.error("Erro ao buscar notícia:", error);
     return null;
   }
 }
