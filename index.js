@@ -151,13 +151,23 @@ async function startNewsCheck() {
   console.log("Iniciando verificação periódica de notícias...");
 
   let lastNewsId = null;
+  let isFirstRun = true;
 
-  // Função para verificar e enviar notícias
   const checkAndSendNews = async () => {
     try {
       const news = await getLatestNews();
 
       if (news && (!lastNewsId || news.id !== lastNewsId)) {
+        if (isFirstRun) {
+          // Apenas registrar a notícia como a última no primeiro ciclo
+          lastNewsId = news.id;
+          isFirstRun = false;
+          console.log(
+            `Notícia detectada no primeiro ciclo (ID: ${news.id}). Armazenada, mas não enviada.`
+          );
+          return;
+        }
+
         lastNewsId = news.id;
         console.log(
           `Nova notícia encontrada: "${news.title}" (ID: ${news.id})`
@@ -173,11 +183,9 @@ async function startNewsCheck() {
                 .catch((err) => null);
 
               if (channel && channel.type === ChannelType.GuildText) {
-                // Verificar a última mensagem do canal
                 const messages = await channel.messages.fetch({ limit: 1 });
                 const lastMessage = messages.first();
 
-                // Verificar se a última mensagem é do bot e contém a mesma notícia
                 const isAlreadySent =
                   lastMessage &&
                   lastMessage.author.id === client.user.id &&
@@ -189,14 +197,7 @@ async function startNewsCheck() {
                   const embed = createNewsEmbed(news);
                   const roleId = config.value.newsRole;
                   const mentionText = roleId ? `<@&${roleId}>` : "";
-                  await channel
-                    .send({ content: mentionText, ...embed })
-                    .catch((err) => {
-                      console.error(
-                        `Erro ao enviar para o canal ${channelId} no servidor ${config.id}:`,
-                        err
-                      );
-                    });
+                  await channel.send({ content: mentionText, ...embed });
                 } else {
                   console.log(
                     `Notícia já enviada no canal ${channelId}, pulando.`
@@ -208,7 +209,6 @@ async function startNewsCheck() {
                 `Erro ao processar canal ${channelId} no servidor ${config.id}:`,
                 err
               );
-              // Continua para o próximo servidor mesmo se houver erro
             }
           }
         }
@@ -217,7 +217,6 @@ async function startNewsCheck() {
       }
     } catch (error) {
       console.error("Erro ao verificar notícias:", error);
-      // Continua a execução mesmo com erro na verificação
     }
   };
 
@@ -226,7 +225,7 @@ async function startNewsCheck() {
     console.error("Erro na primeira verificação:", err)
   );
 
-  // Repetir a cada 5 minutos, usando um wrapper seguro para o setInterval
+  // Repetir a cada 5 minutos
   setInterval(() => {
     checkAndSendNews().catch((err) =>
       console.error("Erro durante verificação programada:", err)
