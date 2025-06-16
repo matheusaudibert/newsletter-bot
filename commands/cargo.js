@@ -10,7 +10,7 @@ export const CargoCommand = {
         .setDescription(
           "O cargo a ser mencionado, ou selecione o atual para remover"
         )
-        .setRequired(false)
+        .setRequired(true)
     ),
 
   async execute(interaction, db) {
@@ -24,14 +24,14 @@ export const CargoCommand = {
         // O cargo fornecido é o mesmo que o atual, então remover
         await db.delete(guildConfigKey);
         interaction.reply({
-          content: `O cargo <@&${newRole.id}> foi removido das menções de notícias.`,
+          content: `O cargo atual foi removido. Nenhum cargo será mencionado.`,
           ephemeral: true,
         });
       } else {
         // É um novo cargo ou não havia cargo antes, então definir/atualizar
         await db.set(guildConfigKey, newRole.id);
         interaction.reply({
-          content: `O cargo <@&${newRole.id}> foi configurado para ser mencionado nas notícias!`,
+          content: `O cargo foi configurado com sucesso!`,
           ephemeral: true,
         });
       }
