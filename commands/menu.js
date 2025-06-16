@@ -14,9 +14,7 @@ export const MenuCommand = {
     const embed = new EmbedBuilder()
       .setColor("#5865F2")
       .setTitle("Configurações do Bot de Newsletter")
-      .setDescription(
-        "Aqui estão as configurações atuais do bot neste servidor:"
-      )
+      .setDescription("Configurações atuais do bot neste servidor:")
       .addFields(
         {
           name: "Canal de notícias",
@@ -32,7 +30,10 @@ export const MenuCommand = {
         }
       )
       .setTimestamp()
-      .setFooter({ text: "Newsletter" });
+      .setFooter({
+        text: "Newsletter",
+        iconURL: "https://filipedeschamps.com.br/avatar-big.png",
+      });
 
     interaction.reply({
       embeds: [embed],
