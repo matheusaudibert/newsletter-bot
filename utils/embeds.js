@@ -26,7 +26,7 @@ export function createNewsEmbed(news) {
       .setCustomId("inviteButton"),
     new ButtonBuilder()
       .setLabel("Ler no TabNews")
-      .setStyle(ButtonStyle.Secondary)
+      .setStyle(ButtonStyle.Success)
       .setCustomId(`tabNewsButton:${news.slug}`),
     new ButtonBuilder()
       .setLabel("Acessar fonte")
