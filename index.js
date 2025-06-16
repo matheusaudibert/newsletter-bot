@@ -124,9 +124,21 @@ client.on("interactionCreate", async (interaction) => {
     } else if (interaction.isButton()) {
       if (interaction.customId === "inviteButton") {
         const inviteLink = `https://newsletterbot.audibert.dev`;
+
         await interaction
           .reply({
             content: `Adicione o bot ao seu servidor através do website oficial: ${inviteLink}`,
+            ephemeral: true,
+          })
+          .catch(console.error);
+      }
+      // Novo handler para tabNewsButton com slug
+      if (interaction.customId.startsWith("tabNewsButton:")) {
+        const slug = interaction.customId.split(":")[1];
+        const tabNewsLink = `https://www.tabnews.com.br/NewsletterOficial/${slug}`;
+        await interaction
+          .reply({
+            content: `Leia essa notícia diretamente no TabNews: ${tabNewsLink}`,
             ephemeral: true,
           })
           .catch(console.error);

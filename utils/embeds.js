@@ -25,6 +25,10 @@ export function createNewsEmbed(news) {
       .setStyle(ButtonStyle.Primary)
       .setCustomId("inviteButton"),
     new ButtonBuilder()
+      .setLabel("Ler no TabNews")
+      .setStyle(ButtonStyle.Secondary)
+      .setCustomId(`tabNewsButton:${news.slug}`),
+    new ButtonBuilder()
       .setLabel("Acessar fonte")
       .setStyle(ButtonStyle.Link)
       .setURL(news.source_url)
