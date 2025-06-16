@@ -26,7 +26,7 @@ export const CanalCommand = {
     await db.set(`guild_${interaction.guildId}.newsChannel`, channel.id);
 
     interaction.reply({
-      content: `Canal de notícias configurado com sucesso para ${channel}!`,
+      content: `Canal de notícias configurado com sucesso!`,
       ephemeral: true,
     });
   },
