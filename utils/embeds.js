@@ -6,19 +6,25 @@ import {
 } from "discord.js";
 
 export function createNewsEmbed(news) {
-  // Criar embed com informações da notícia
   const embed = new EmbedBuilder()
     .setColor("#5865F2")
     .setTitle(news.title)
-    .setDescription(news.body)
-    .setURL(news.url)
+    .setURL(news.source_url || "https://www.tabnews.com.br/NewsletterOficial")
+    .setDescription(
+      (() => {
+        const raw = news.body || "Sem conteúdo disponível para esta notícia.";
+        const trimmed = raw.trim();
+        const max = 4096;
+        if (trimmed.length > max) return trimmed.slice(0, max - 3) + "...";
+        return trimmed;
+      })()
+    )
     .setTimestamp(new Date(news.published_at))
     .setFooter({
       text: "Newsletter",
       iconURL: "https://filipedeschamps.com.br/avatar-big.png",
     });
 
-  // Adicionar botões
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel("Adicionar Newsletter")
