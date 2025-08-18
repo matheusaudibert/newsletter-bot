@@ -116,7 +116,7 @@ async function startNewsCheck() {
               .fetch(config.value.newsChannel)
               .catch(() => null);
             if (channel && channel.type === ChannelType.GuildText) {
-              console.log(news);
+              // console.log(news);
               const payload = createNewsEmbed(news);
               const guildId = config.id.replace(/^guild_/, "").split(".")[0];
               let roleId =
