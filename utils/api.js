@@ -7,7 +7,13 @@ const API_DETAIL_URL =
 
 export async function getLatestNews() {
   try {
-    const listResponse = await fetch(API_LIST_URL);
+    const headers = {
+      Cookie: `api_key_beta=${process.env.APY_KEY_BETA}`,
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36",
+    };
+
+    const listResponse = await fetch(API_LIST_URL, { headers });
     if (!listResponse.ok) {
       throw new Error(
         `Falha ao obter lista de notícias: ${listResponse.status}`
@@ -18,7 +24,10 @@ export async function getLatestNews() {
       return null;
     }
     const latestMeta = listData[0];
-    const detailResponse = await fetch(API_DETAIL_URL + latestMeta.slug);
+
+    const detailResponse = await fetch(API_DETAIL_URL + latestMeta.slug, {
+      headers,
+    });
     if (!detailResponse.ok) {
       throw new Error(
         `Falha ao obter detalhes da notícia: ${detailResponse.status}`
