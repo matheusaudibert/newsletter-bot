@@ -100,47 +100,61 @@ client.on("interactionCreate", async (interaction) => {
 
 async function startNewsCheck() {
   console.log("Iniciando verificação periódica de notícias...");
-  let lastNewsId = null;
 
   const checkAndSendNews = async () => {
     try {
       const news = await getLatestNews();
-      if (news && news.id !== lastNewsId) {
-        lastNewsId = news.id;
-        console.log(`Nova notícia detectada (ID: ${news.id})`);
+      if (!news) {
+        console.log("Nenhuma notícia nova encontrada");
+        return;
+      }
 
-        const guildConfigs = await db.all();
-        for (const config of guildConfigs) {
-          if (config.id.startsWith("guild_") && config.value.newsChannel) {
-            const channel = await client.channels
-              .fetch(config.value.newsChannel)
-              .catch(() => null);
-            if (channel && channel.type === ChannelType.GuildText) {
-              // console.log(news);
-              const payload = createNewsEmbed(news);
-              const guildId = config.id.replace(/^guild_/, "").split(".")[0];
-              let roleId =
-                config.value && config.value.newsRole
-                  ? config.value.newsRole
-                  : null;
-              if (!roleId) {
-                try {
-                  roleId = await db.get(`guild_${guildId}.newsRole`);
-                } catch (e) {
-                  roleId = null;
-                }
+      const guildConfigs = await db.all();
+      let sentToAnyGuild = false;
+
+      for (const config of guildConfigs) {
+        if (config.id.startsWith("guild_") && config.value.newsChannel) {
+          const guildId = config.id.replace(/^guild_/, "").split(".")[0];
+          const lastSentIdKey = `guild_${guildId}.lastNewsId`;
+
+          // verifica se já enviou essa notícia para esse guild
+          const lastSentId = await db.get(lastSentIdKey);
+          if (lastSentId === news.id) {
+            continue; // já enviada para esse guild
+          }
+
+          const channel = await client.channels
+            .fetch(config.value.newsChannel)
+            .catch(() => null);
+          if (channel && channel.type === ChannelType.GuildText) {
+            const payload = createNewsEmbed(news);
+            let roleId =
+              config.value && config.value.newsRole
+                ? config.value.newsRole
+                : null;
+            if (!roleId) {
+              try {
+                roleId = await db.get(`guild_${guildId}.newsRole`);
+              } catch (e) {
+                roleId = null;
               }
-
-              const sendPayload = { ...payload };
-              if (roleId) {
-                sendPayload.content = `<@&${roleId}>`;
-                sendPayload.allowedMentions = { roles: [roleId] };
-              }
-
-              await channel.send(sendPayload).catch(console.error);
             }
+
+            const sendPayload = { ...payload };
+            if (roleId) {
+              sendPayload.content = `<@&${roleId}>`;
+              sendPayload.allowedMentions = { roles: [roleId] };
+            }
+
+            await channel.send(sendPayload).catch(console.error);
+            await db.set(lastSentIdKey, news.id); // marca como enviada para esse guild
+            sentToAnyGuild = true;
           }
         }
+      }
+
+      if (sentToAnyGuild) {
+        console.log(`Nova notícia detectada (ID: ${news.id})`);
       } else {
         console.log("Nenhuma notícia nova encontrada");
       }
