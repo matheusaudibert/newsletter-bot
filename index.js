@@ -120,7 +120,7 @@ async function startNewsCheck() {
           // verifica se já enviou essa notícia para esse guild
           const lastSentId = await db.get(lastSentIdKey);
           if (lastSentId === news.id) {
-            continue; // já enviada para esse guild
+            continue;
           }
 
           const channel = await client.channels
