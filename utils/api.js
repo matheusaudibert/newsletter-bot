@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 const API_LIST_URL =
-  "https://www.tabnews.com.br/api/v1/contents/NewsletterOficial?per_page=1";
+  "https://www.tabnews.com.br/api/v1/contents/NewsletterOficial?per_page=1&strategy=new";
 const API_DETAIL_URL =
   "https://www.tabnews.com.br/api/v1/contents/NewsletterOficial/";
 
