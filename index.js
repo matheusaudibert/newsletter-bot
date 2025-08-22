@@ -16,6 +16,8 @@ import { MenuCommand } from "./commands/menu.js";
 
 config();
 
+let newsIds = [];
+
 const db = new QuickDB();
 
 const client = new Client({
@@ -109,19 +111,19 @@ async function startNewsCheck() {
         return;
       }
 
+      const lastSentIdKey = "lastGlobalNewsId";
+      const lastSentId = await db.get(lastSentIdKey);
+      if (lastSentId === news.id) {
+        console.log("Nenhuma notícia nova encontrada");
+        return;
+      }
+
       const guildConfigs = await db.all();
       let sentToAnyGuild = false;
 
       for (const config of guildConfigs) {
         if (config.id.startsWith("guild_") && config.value.newsChannel) {
           const guildId = config.id.replace(/^guild_/, "").split(".")[0];
-          const lastSentIdKey = `guild_${guildId}.lastNewsId`;
-
-          // verifica se já enviou essa notícia para esse guild
-          const lastSentId = await db.get(lastSentIdKey);
-          if (lastSentId === news.id) {
-            continue;
-          }
 
           const channel = await client.channels
             .fetch(config.value.newsChannel)
@@ -147,13 +149,13 @@ async function startNewsCheck() {
             }
 
             await channel.send(sendPayload).catch(console.error);
-            await db.set(lastSentIdKey, news.id); // marca como enviada para esse guild
             sentToAnyGuild = true;
           }
         }
       }
 
       if (sentToAnyGuild) {
+        await db.set(lastSentIdKey, news.id); // salva o último ID enviado
         console.log(`Nova notícia detectada (ID: ${news.id})`);
       } else {
         console.log("Nenhuma notícia nova encontrada");
