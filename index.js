@@ -16,8 +16,6 @@ import { MenuCommand } from "./commands/menu.js";
 
 config();
 
-let lastSentNewsId = null;
-
 const db = new QuickDB();
 
 const client = new Client({
@@ -111,18 +109,16 @@ async function startNewsCheck() {
         return;
       }
 
-      if (lastSentNewsId === null) {
-        lastSentNewsId = news.id;
-        console.log(
-          `Verificação inicial de notícias. ID da última notícia: ${lastSentNewsId}`
-        );
-        return;
-      }
+      const lastSentNewsSlug = await db.get("lastSentNewsSlug");
 
-      if (lastSentNewsId === news.id) {
+      if (lastSentNewsSlug === news.slug) {
         console.log("Nenhuma notícia nova encontrada");
         return;
       }
+
+      // Atualiza o slug antes de começar a enviar, para evitar duplicatas em caso de erro parcial.
+      await db.set("lastSentNewsSlug", news.slug);
+      console.log(`Nova notícia detectada (Slug: ${news.slug}). Enviando...`);
 
       const guildConfigs = await db.all();
       let sentToAnyGuild = false;
@@ -161,10 +157,9 @@ async function startNewsCheck() {
       }
 
       if (sentToAnyGuild) {
-        lastSentNewsId = news.id;
-        console.log(`Nova notícia detectada (ID: ${news.id})`);
+        console.log(`Notícia (Slug: ${news.slug}) enviada com sucesso.`);
       } else {
-        console.log("Nenhuma notícia nova encontrada para enviar.");
+        console.log("Nenhum canal configurado para receber a nova notícia.");
       }
     } catch (err) {
       console.error("Erro ao verificar notícias:", err);
