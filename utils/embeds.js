@@ -25,6 +25,13 @@ export function createNewsEmbed(news) {
       iconURL: "https://filipedeschamps.com.br/avatar-big.png",
     });
 
+  const prefix = "tabNewsButton:";
+  const maxSlugLength = 100 - prefix.length;
+  const slug =
+    news.slug.length > maxSlugLength
+      ? news.slug.substring(0, maxSlugLength)
+      : news.slug;
+
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel("Adicionar Newsletter")
@@ -33,7 +40,7 @@ export function createNewsEmbed(news) {
     new ButtonBuilder()
       .setLabel("Ler no TabNews")
       .setStyle(ButtonStyle.Success)
-      .setCustomId(`tabNewsButton:${news.slug}`),
+      .setCustomId(`${prefix}${slug}`),
     new ButtonBuilder()
       .setLabel("Acessar fonte")
       .setStyle(ButtonStyle.Link)
