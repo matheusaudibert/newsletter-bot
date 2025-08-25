@@ -161,7 +161,7 @@ async function startNewsCheck() {
       }
 
       if (sentToAnyGuild) {
-        lastSentNewsId = news.id; // atualiza o último ID enviado
+        lastSentNewsId = news.id;
         console.log(`Nova notícia detectada (ID: ${news.id})`);
       } else {
         console.log("Nenhuma notícia nova encontrada para enviar.");
