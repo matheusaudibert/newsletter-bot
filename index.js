@@ -16,7 +16,7 @@ import { MenuCommand } from "./commands/menu.js";
 
 config();
 
-let newsIds = [];
+let lastSentNewsId = null;
 
 const db = new QuickDB();
 
@@ -107,13 +107,19 @@ async function startNewsCheck() {
     try {
       const news = await getLatestNews();
       if (!news) {
-        console.log("Nenhuma notícia nova encontrada");
+        console.log("Nenhuma notícia encontrada na API.");
         return;
       }
 
-      const lastSentIdKey = "lastGlobalNewsId";
-      const lastSentId = await db.get(lastSentIdKey);
-      if (lastSentId === news.id) {
+      if (lastSentNewsId === null) {
+        lastSentNewsId = news.id;
+        console.log(
+          `Verificação inicial de notícias. ID da última notícia: ${lastSentNewsId}`
+        );
+        return;
+      }
+
+      if (lastSentNewsId === news.id) {
         console.log("Nenhuma notícia nova encontrada");
         return;
       }
@@ -155,10 +161,10 @@ async function startNewsCheck() {
       }
 
       if (sentToAnyGuild) {
-        await db.set(lastSentIdKey, news.id); // salva o último ID enviado
+        lastSentNewsId = news.id; // atualiza o último ID enviado
         console.log(`Nova notícia detectada (ID: ${news.id})`);
       } else {
-        console.log("Nenhuma notícia nova encontrada");
+        console.log("Nenhuma notícia nova encontrada para enviar.");
       }
     } catch (err) {
       console.error("Erro ao verificar notícias:", err);
