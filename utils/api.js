@@ -34,6 +34,7 @@ export async function getLatestNews() {
       );
     }
     const newsDetail = await detailResponse.json();
+    console.log(newsDetail);
     return newsDetail;
   } catch (error) {
     console.error("Erro ao buscar notícia:", error);
