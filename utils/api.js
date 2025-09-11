@@ -30,7 +30,7 @@ export async function getLatestNews() {
     });
     if (!detailResponse.ok) {
       throw new Error(
-        `Falha ao obter detalhes da notícia: ${detailResponse.status}`
+        `Falha ao obter detalhes da noticia: ${detailResponse.status}`
       );
     }
     const newsDetail = await detailResponse.json();
