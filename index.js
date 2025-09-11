@@ -110,15 +110,10 @@ async function startNewsCheck() {
       }
 
       const lastSentNewsSlug = await db.get("lastSentNewsSlug");
-
       if (lastSentNewsSlug === news.slug) {
         console.log("Nenhuma notícia nova encontrada");
         return;
       }
-
-      // Atualiza o slug antes de começar a enviar, para evitar duplicatas em caso de erro parcial.
-      await db.set("lastSentNewsSlug", news.slug);
-      console.log(`Nova notícia detectada (Slug: ${news.slug}). Enviando...`);
 
       const guildConfigs = await db.all();
       let sentToAnyGuild = false;
@@ -157,6 +152,7 @@ async function startNewsCheck() {
       }
 
       if (sentToAnyGuild) {
+        await db.set("lastSentNewsSlug", news.slug);
         console.log(`Notícia (Slug: ${news.slug}) enviada com sucesso.`);
       } else {
         console.log("Nenhum canal configurado para receber a nova notícia.");
