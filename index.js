@@ -7,7 +7,7 @@ import {
   ChannelType,
 } from "discord.js";
 import { config } from "dotenv";
-import { QuickDB } from "quick.db";
+import db from "./database.js";
 import { createNewsEmbed } from "./utils/embeds.js";
 import { getLatestNews } from "./utils/api.js";
 import { CanalCommand } from "./commands/canal.js";
@@ -15,8 +15,6 @@ import { CargoCommand } from "./commands/cargo.js";
 import { MenuCommand } from "./commands/menu.js";
 
 config();
-
-const db = new QuickDB();
 
 const client = new Client({
   intents: [
