@@ -1,122 +1,85 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dataDir = path.join(__dirname, "data");
-const dataFile = path.join(dataDir, "database.json");
+const guildSchema = new mongoose.Schema({
+  guildId: { type: String, required: true, unique: true },
+  newsChannel: { type: String, default: null },
+  newsRole: { type: String, default: null },
+});
 
-let cache = null;
-let writeQueue = Promise.resolve();
+const configSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  value: mongoose.Schema.Types.Mixed,
+});
 
-function getPathValue(source, key) {
-  return key.split(".").reduce((current, segment) => current?.[segment], source);
+const Guild = mongoose.model("Guild", guildSchema);
+const Config = mongoose.model("Config", configSchema);
+
+export async function connectDatabase() {
+  await mongoose.connect(process.env.MONGODB_URI);
+  console.log("Conectado ao MongoDB");
 }
 
-function setPathValue(source, key, value) {
-  const segments = key.split(".");
-  let current = source;
-
-  for (let index = 0; index < segments.length - 1; index += 1) {
-    const segment = segments[index];
-    if (!current[segment] || typeof current[segment] !== "object") {
-      current[segment] = {};
-    }
-    current = current[segment];
+function parseKey(key) {
+  if (key.startsWith("guild_")) {
+    const parts = key.split(".");
+    const guildId = parts[0].replace("guild_", "");
+    const field = parts[1] ?? null;
+    return { type: "guild", guildId, field };
   }
-
-  current[segments[segments.length - 1]] = value;
-}
-
-function deletePathValue(source, key) {
-  const segments = key.split(".");
-  const stack = [];
-  let current = source;
-
-  for (const segment of segments.slice(0, -1)) {
-    if (!current || typeof current !== "object") {
-      return;
-    }
-
-    stack.push([current, segment]);
-    current = current[segment];
-  }
-
-  if (!current || typeof current !== "object") {
-    return;
-  }
-
-  delete current[segments[segments.length - 1]];
-
-  for (let index = stack.length - 1; index >= 0; index -= 1) {
-    const [parent, segment] = stack[index];
-    if (parent[segment] && typeof parent[segment] === "object" && Object.keys(parent[segment]).length === 0) {
-      delete parent[segment];
-    } else {
-      break;
-    }
-  }
-}
-
-async function loadDatabase() {
-  if (cache) {
-    return cache;
-  }
-
-  try {
-    const rawData = await fs.readFile(dataFile, "utf8");
-    cache = rawData ? JSON.parse(rawData) : {};
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      cache = {};
-    } else {
-      throw error;
-    }
-  }
-
-  return cache;
-}
-
-async function persistDatabase() {
-  await fs.mkdir(dataDir, { recursive: true });
-
-  const tempFile = `${dataFile}.tmp`;
-  await fs.writeFile(tempFile, JSON.stringify(cache, null, 2), "utf8");
-  await fs.rename(tempFile, dataFile);
-}
-
-async function queueWrite(task) {
-  writeQueue = writeQueue.then(task, task);
-  return writeQueue;
+  return { type: "config", key };
 }
 
 const db = {
   async get(key) {
-    const state = await loadDatabase();
-    return getPathValue(state, key);
+    const parsed = parseKey(key);
+    if (parsed.type === "guild") {
+      const guild = await Guild.findOne({ guildId: parsed.guildId });
+      if (!guild) return undefined;
+      if (parsed.field) return guild[parsed.field] ?? undefined;
+      return { newsChannel: guild.newsChannel, newsRole: guild.newsRole };
+    }
+    const config = await Config.findOne({ key: parsed.key });
+    return config?.value ?? undefined;
   },
 
   async set(key, value) {
-    return queueWrite(async () => {
-      const state = await loadDatabase();
-      setPathValue(state, key, value);
-      await persistDatabase();
-      return value;
-    });
+    const parsed = parseKey(key);
+    if (parsed.type === "guild") {
+      if (parsed.field) {
+        await Guild.findOneAndUpdate(
+          { guildId: parsed.guildId },
+          { [parsed.field]: value },
+          { upsert: true, new: true }
+        );
+      }
+    } else {
+      await Config.findOneAndUpdate(
+        { key: parsed.key },
+        { value },
+        { upsert: true }
+      );
+    }
+    return value;
   },
 
   async delete(key) {
-    return queueWrite(async () => {
-      const state = await loadDatabase();
-      deletePathValue(state, key);
-      await persistDatabase();
-    });
+    const parsed = parseKey(key);
+    if (parsed.type === "guild" && parsed.field) {
+      await Guild.findOneAndUpdate(
+        { guildId: parsed.guildId },
+        { [parsed.field]: null }
+      );
+    } else if (parsed.type === "config") {
+      await Config.deleteOne({ key: parsed.key });
+    }
   },
 
   async all() {
-    const state = await loadDatabase();
-    return Object.entries(state).map(([id, value]) => ({ id, value }));
+    const guilds = await Guild.find({});
+    return guilds.map((g) => ({
+      id: `guild_${g.guildId}`,
+      value: { newsChannel: g.newsChannel, newsRole: g.newsRole },
+    }));
   },
 };
 
@@ -137,8 +100,7 @@ export async function getNewsRole(guildId) {
 }
 
 export async function getAllGuildConfigs() {
-  const all = await db.all();
-  return all.filter((item) => item.id.startsWith("guild_"));
+  return db.all();
 }
 
 export default db;

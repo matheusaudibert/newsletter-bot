@@ -27,4 +27,5 @@ build/
 *.sublime-workspace
 
 # Outros
-newsletter-discord.zip
+notification-test.js
+.claude/

@@ -7,12 +7,13 @@ import {
   ChannelType,
 } from "discord.js";
 import { config } from "dotenv";
-import db from "./database.js";
+import db, { connectDatabase } from "./database.js";
 import { createNewsEmbed } from "./utils/embeds.js";
 import { getLatestNews } from "./utils/api.js";
 import { CanalCommand } from "./commands/canal.js";
 import { CargoCommand } from "./commands/cargo.js";
 import { MenuCommand } from "./commands/menu.js";
+import { startServer } from "./server.js";
 
 config();
 
@@ -50,6 +51,7 @@ client.once("ready", async () => {
     console.error("Erro ao registrar comandos:", error);
   }
 
+  startServer(client);
   startNewsCheck();
 });
 
@@ -169,6 +171,7 @@ client.on("shardDisconnect", () => {
   client.login(process.env.TOKEN).catch(console.error);
 });
 
+await connectDatabase();
 client.login(process.env.TOKEN).catch((error) => {
   console.error("Erro ao fazer login:", error);
   setTimeout(() => client.login(process.env.TOKEN).catch(console.error), 5000);
