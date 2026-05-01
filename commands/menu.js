@@ -29,11 +29,6 @@ export const MenuCommand = {
             : "Não configurado. Use `/cargo` para configurar.",
         }
       )
-      .setTimestamp()
-      .setFooter({
-        text: "Newsletter",
-        iconURL: "https://filipedeschamps.com.br/avatar-big.png",
-      });
 
     interaction.reply({
       embeds: [embed],

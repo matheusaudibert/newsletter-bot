@@ -19,11 +19,6 @@ export function createNewsEmbed(news) {
         return trimmed;
       })()
     )
-    .setTimestamp(new Date(news.published_at))
-    .setFooter({
-      text: "Newsletter",
-      iconURL: "https://filipedeschamps.com.br/avatar-big.png",
-    });
 
   const prefix = "tabNewsButton:";
   const maxSlugLength = 100 - prefix.length;
