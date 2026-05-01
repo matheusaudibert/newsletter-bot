@@ -57,7 +57,9 @@ export function startServer(client) {
         }
 
         const guilds = await buildGuildsList(client);
-        guildsCache = guilds;
+        const payload = { guilds, totalGuilds: guilds.length };
+
+        guildsCache = payload;
         guildsCacheExpiry = now + GUILDS_CACHE_TTL;
 
         res.writeHead(200, {
@@ -65,7 +67,7 @@ export function startServer(client) {
           "X-Cache": "MISS",
           "Cache-Control": `max-age=${GUILDS_CACHE_TTL / 1000}`,
         });
-        res.end(JSON.stringify(guilds));
+        res.end(JSON.stringify(payload));
       } catch (err) {
         console.error("Erro na rota /guilds:", err);
         res.writeHead(500, { "Content-Type": "application/json" });
