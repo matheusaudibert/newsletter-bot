@@ -5,6 +5,21 @@ const API_LIST_URL =
 const API_DETAIL_URL =
   "https://www.tabnews.com.br/api/v1/contents/NewsletterOficial/";
 
+export async function getNewsBySlug(slug) {
+  try {
+    const headers = {
+      Cookie: `api_key_beta=${process.env.APY_KEY_BETA}`,
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36",
+    };
+    const response = await fetch(API_DETAIL_URL + slug, { headers });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function getLatestNews() {
   try {
     const headers = {

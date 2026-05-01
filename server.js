@@ -1,10 +1,16 @@
 import { createServer } from "http";
 import { ChannelType } from "discord.js";
+import db from "./database.js";
+import { getNewsBySlug } from "./utils/api.js";
 
-const CACHE_TTL = 3 * 60 * 60 * 1000; // 3 horas
+const GUILDS_CACHE_TTL = 3 * 60 * 60 * 1000; // 3 horas
+const NEWS_CACHE_TTL = 2 * 60 * 1000; // 2 minutos
 
 let guildsCache = null;
-let cacheExpiry = 0;
+let guildsCacheExpiry = 0;
+
+let newsCache = null;
+let newsCacheExpiry = 0;
 
 async function buildGuildsList(client) {
   const results = await Promise.all(
@@ -41,27 +47,76 @@ export function startServer(client) {
       try {
         const now = Date.now();
 
-        if (guildsCache && now < cacheExpiry) {
+        if (guildsCache && now < guildsCacheExpiry) {
           res.writeHead(200, {
             "Content-Type": "application/json",
             "X-Cache": "HIT",
-            "Cache-Control": `max-age=${Math.floor((cacheExpiry - now) / 1000)}`,
+            "Cache-Control": `max-age=${Math.floor((guildsCacheExpiry - now) / 1000)}`,
           });
           return res.end(JSON.stringify(guildsCache));
         }
 
         const guilds = await buildGuildsList(client);
         guildsCache = guilds;
-        cacheExpiry = now + CACHE_TTL;
+        guildsCacheExpiry = now + GUILDS_CACHE_TTL;
 
         res.writeHead(200, {
           "Content-Type": "application/json",
           "X-Cache": "MISS",
-          "Cache-Control": `max-age=${CACHE_TTL / 1000}`,
+          "Cache-Control": `max-age=${GUILDS_CACHE_TTL / 1000}`,
         });
         res.end(JSON.stringify(guilds));
       } catch (err) {
         console.error("Erro na rota /guilds:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Erro interno do servidor" }));
+      }
+    } else if (req.url === "/new" && req.method === "GET") {
+      try {
+        const now = Date.now();
+
+        if (newsCache && now < newsCacheExpiry) {
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "X-Cache": "HIT",
+            "Cache-Control": `max-age=${Math.floor((newsCacheExpiry - now) / 1000)}`,
+          });
+          return res.end(JSON.stringify(newsCache));
+        }
+
+        const slug = await db.get("lastSentNewsSlug");
+
+        if (!slug) {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "Nenhuma notícia enviada ainda" }));
+        }
+
+        const news = await getNewsBySlug(slug);
+
+        if (!news) {
+          res.writeHead(502, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "Falha ao buscar notícia na API" }));
+        }
+
+        const payload = {
+          slug: news.slug,
+          title: news.title,
+          body: news.body,
+          tabNewsUrl: `https://www.tabnews.com.br/NewsletterOficial/${news.slug}`,
+          sourceUrl: news.source_url,
+        };
+
+        newsCache = payload;
+        newsCacheExpiry = now + NEWS_CACHE_TTL;
+
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "X-Cache": "MISS",
+          "Cache-Control": `max-age=${NEWS_CACHE_TTL / 1000}`,
+        });
+        res.end(JSON.stringify(payload));
+      } catch (err) {
+        console.error("Erro na rota /new:", err);
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Erro interno do servidor" }));
       }
