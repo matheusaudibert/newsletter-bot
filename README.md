@@ -10,13 +10,13 @@
   </a>
 </p>
 
-# Newsletter Bot
+# Newsletter
 
 Bot para Discord que envia automaticamente as notícias da newsletter do Filipe Deschamps para seu servidor.
 
 ## Sobre o Projeto
 
-O Newsletter Bot é uma solução para manter sua comunidade informada sobre tecnologia e programação através do Discord. O bot captura e encaminha automaticamente as edições da [newsletter do Filipe Deschamps](https://filipedeschamps.com.br/newsletter), uma das newsletters de tecnologia mais populares do Brasil, diretamente para o canal configurado no seu servidor Discord.
+O Newsletterbo é uma solução para manter sua comunidade informada sobre tecnologia e programação através do Discord. O bot captura e encaminha automaticamente as edições da [newsletter do Filipe Deschamps](https://filipedeschamps.com.br/newsletter), uma das newsletters de tecnologia mais populares do Brasil, diretamente para o canal configurado no seu servidor Discord.
 
 ## Começando
 
@@ -50,7 +50,7 @@ Para acessar todas as configurações do bot:
 /menu
 ```
 
-## Por que usar o Newsletter Bot?
+## Por que usar o Newsletter?
 
 - **Mantenha-se atualizado**: Receba automaticamente as últimas notícias sobre tecnologia
 - **Comunidade engajada**: Gere discussões interessantes baseadas nos conteúdos da newsletter
